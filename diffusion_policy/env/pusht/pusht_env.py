@@ -342,26 +342,34 @@ class PushTEnv(gym.Env):
     def add_tee(self, position, angle, scale=30, color='LightSlateGray', mask=pymunk.ShapeFilter.ALL_MASKS()):
         mass = 1
         length = 4
-        vertices1 = [(-length*scale/2, scale),
+        vertices1 = [(-scale/2, scale),
                                  ( length*scale/2, scale),
                                  ( length*scale/2, 0),
-                                 (-length*scale/2, 0)]
+                                 ( -scale/2, 0)]
         inertia1 = pymunk.moment_for_poly(mass, vertices=vertices1)
         vertices2 = [(-scale/2, scale),
                                  (-scale/2, length*scale),
                                  ( scale/2, length*scale),
                                  ( scale/2, scale)]
         inertia2 = pymunk.moment_for_poly(mass, vertices=vertices1)
+        vertices3 = [(scale/2, length*scale/2 + scale/2),
+                                 ( length*scale/2, length*scale/2 + scale/2),
+                                 ( length*scale/2, length*scale/2 - scale/2),
+                                 ( scale/2, length*scale/2 - scale/2)]
+        inertia3 = pymunk.moment_for_poly(mass, vertices=vertices3)
         body = pymunk.Body(mass, inertia1 + inertia2)
         shape1 = pymunk.Poly(body, vertices1)
         shape2 = pymunk.Poly(body, vertices2)
+        shape3 = pymunk.Poly(body, vertices3)
         shape1.color = pygame.Color(color)
         shape2.color = pygame.Color(color)
+        shape3.color = pygame.Color(color)
         shape1.filter = pymunk.ShapeFilter(mask=mask)
         shape2.filter = pymunk.ShapeFilter(mask=mask)
-        body.center_of_gravity = (shape1.center_of_gravity + shape2.center_of_gravity) / 2
+        shape3.filter = pymunk.ShapeFilter(mask=mask)
+        body.center_of_gravity = (shape1.center_of_gravity + shape2.center_of_gravity + shape3.center_of_gravity) / 3
         body.position = position
         body.angle = angle
         body.friction = 1
-        self.space.add(body, shape1, shape2)
+        self.space.add(body, shape1, shape2, shape3)
         return body
